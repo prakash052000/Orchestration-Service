@@ -1,0 +1,88 @@
+server:
+  port: 9191  # User-service runs on port 9999
+  servlet:
+    context-path: /orchestration
+
+spring:
+  application:
+    name:  Orchestration-Service  # Ensure consistent lowercase name
+
+  cloud:
+    compatibility-verifier:
+      enabled: false  # Prevents Spring Cloud version mismatches
+
+    discovery:
+      locator:
+        enabled: true
+        lower-case-service-id: true  # Ensures consistent service names
+
+  boot:
+    admin:
+      client:
+        url: http://localhost:8081  # Spring Boot Admin Server
+        instance:
+          service-base-url: http://localhost:9191  # Prevents duplicate registrations
+          prefer-ip: false  # Register using IP instead of hostname
+        metadata:
+          instance-id: ${spring.application.name}:${server.port}-${random.value}  # Ensures uniqueness
+
+  main:
+    allow-bean-definition-overriding: true  # Avoids bean conflicts
+
+  web:
+    cors:
+      allowed-origins: "*"  # Allows all origins (Modify for security)
+      allowed-methods: "*"
+      allowed-headers: "*"
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher  # ✅ Fixed incorrect value
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Exposes all Actuator endpoints
+  endpoint:
+    health:
+      show-details: always  # Provides detailed health info
+  security:
+     enabled:false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/  # Eureka Server URL
+    register-with-eureka: true  # Ensures service is registered in Eureka
+    fetch-registry: true  # Fetches registry to discover other services
+
+  instance:
+    instance-id: ${spring.application.name}:${server.port}-${random.value}  # Unique instance ID
+    prefer-ip-address: false  # Registers using IP instead of hostname
+    hostname: localhost # Prevents duplicate hostname-based registration
+    metadata-map:
+      management.context-path: /actuator  # Ensures Spring Boot Admin finds the actuator
+      instanceId: ${spring.application.name}:${server.port}-${random.value}  # Unique ID per instance
+
+# ✅ Swagger Configuration  
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs  # API docs path
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI path
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  paths-to-match: /**
+  show-actuator: false
+  swagger-ui-config:
+    disable-swagger-default-url: true
+
+# ✅ Spring Security (Permitting Swagger URLs)
+security:
+  ignored:
+    - "/v3/api-docs/**"
+    - "/swagger-ui.html"
+    - "/swagger-ui/**"
+    - "/webjars/**"
