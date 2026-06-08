@@ -1,7 +1,6 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /build
 
-COPY settings.xml /root/.m2/settings.xml
 
 COPY pom.xml .
 COPY src ./src
