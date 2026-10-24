@@ -1,88 +1,87 @@
 server:
-  port: 9191  # User-service runs on port 9999
+  port: 9191
   servlet:
-    context-path: /orchestration
+    context-path: /OrchestrationService
 
 spring:
   application:
-    name:  Orchestration-Service  # Ensure consistent lowercase name
-
+    name: OrchestrationService
   cloud:
     compatibility-verifier:
-      enabled: false  # Prevents Spring Cloud version mismatches
-
-    discovery:
-      locator:
-        enabled: true
-        lower-case-service-id: true  # Ensures consistent service names
-
+      enabled: false
   boot:
     admin:
       client:
-        url: http://localhost:8081  # Spring Boot Admin Server
+        url: http://localhost:8081
         instance:
-          service-base-url: http://localhost:9191  # Prevents duplicate registrations
-          prefer-ip: false  # Register using IP instead of hostname
-        metadata:
-          instance-id: ${spring.application.name}:${server.port}-${random.value}  # Ensures uniqueness
-
+          service-base-url: http://localhost:9191
+          prefer-ip: false
+          metadata:
+            unique-name: OrchestrationService
+            service-type: orchestration
   main:
-    allow-bean-definition-overriding: true  # Avoids bean conflicts
-
+    allow-bean-definition-overriding: true
   web:
     cors:
-      allowed-origins: "*"  # Allows all origins (Modify for security)
+      allowed-origins: "*"
       allowed-methods: "*"
       allowed-headers: "*"
-
   mvc:
     pathmatch:
-      matching-strategy: ant-path-matcher  # ✅ Fixed incorrect value
+      matching-strategy: path_pattern_parser
+
+info:
+  app:
+    name: OrchestrationService
+    type: orchestration
+    port: 9191
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"  # Exposes all Actuator endpoints
+        include: "*"
   endpoint:
     health:
-      show-details: always  # Provides detailed health info
-  security:
-     enabled:false
+      show-details: always
+    info:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+  metrics:
+    tags:
+      application: OrchestrationService
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/  # Eureka Server URL
-    register-with-eureka: true  # Ensures service is registered in Eureka
-    fetch-registry: true  # Fetches registry to discover other services
-
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
   instance:
-    instance-id: ${spring.application.name}:${server.port}-${random.value}  # Unique instance ID
-    prefer-ip-address: false  # Registers using IP instead of hostname
-    hostname: localhost # Prevents duplicate hostname-based registration
+    instance-id: OrchestrationService:9191
+    prefer-ip-address: false
+    hostname: localhost
     metadata-map:
-      management.context-path: /actuator  # Ensures Spring Boot Admin finds the actuator
-      instanceId: ${spring.application.name}:${server.port}-${random.value}  # Unique ID per instance
+      unique-name: OrchestrationService
+      service-type: orchestration
+      port: 9191
+      management.context-path: /OrchestrationService/actuator
 
-# ✅ Swagger Configuration  
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs  # API docs path
+    path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html  # Swagger UI path
+    enabled: true
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+  packages-to-scan: com.orchestration
+  paths-to-match: /**
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
-  paths-to-match: /**
-  show-actuator: false
-  swagger-ui-config:
-    disable-swagger-default-url: true
-
-# ✅ Spring Security (Permitting Swagger URLs)
-security:
-  ignored:
-    - "/v3/api-docs/**"
-    - "/swagger-ui.html"
-    - "/swagger-ui/**"
-    - "/webjars/**"
