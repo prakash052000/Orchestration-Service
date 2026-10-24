@@ -85,3 +85,8 @@ springdoc:
   paths-to-match: /**
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+
+# WeCoreMotorApi portal user (login_master in wecorelive). Do not use the RDS DB user here.
+wecore:
+  login-id: GRPZAM
+  password: ${WECORE_LOGIN_PASSWORD:}
